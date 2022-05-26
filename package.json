@@ -1,0 +1,22 @@
+{
+  "name": "ciphering",
+  "version": "1.0.0",
+  "description": "Implement CLI tool that will encode and decode a text by 3 substitution ciphers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/filkevich/ciphering.git"
+  },
+  "keywords": [
+    "ciphering"
+  ],
+  "author": "Artiom Filkevich <artiom.filkevich@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/filkevich/ciphering/issues"
+  },
+  "homepage": "https://github.com/filkevich/ciphering#readme"
+}
