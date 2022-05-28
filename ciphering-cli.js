@@ -1,32 +1,73 @@
-function caesar_shift(lowerCasedLetter, config) {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-  const currentIndex = alphabet.indexOf(lowerCasedLetter)
-  const shift = config ? 1 : -1
-  const shiftedIndex = currentIndex + shift
-  if (shiftedIndex > 25) return alphabet[shiftedIndex - 26]
-  if (shiftedIndex < 0) return alphabet[shiftedIndex + 26]
-  return alphabet[shiftedIndex]
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+const UPPERCASE_REGEXP = /[A-Z]/
+const LETTER_REGEXP = /[a-z]/i
+const CIPHER_CONFIG_REGEXP = /^[CR][01]$|^[A]$/
+
+function ciphersFromConfig(config) {
+  const ciphers = config.split('-')
+  const isValid = ciphers.every(elem => CIPHER_CONFIG_REGEXP.test(elem))
+  
+  return isValid ? ciphers : false
 }
 
-function caesar(letter, config) {
-  const isLetter = letter.match(/[A-Z]/gi)
-  if (!isLetter) return letter
-  const isUpperCased = letter.match(/[A-Z]/g)
-  const letterToShift = isUpperCased ? letter.toLowerCase() : letter
-  const shiftedLetter = caesar_shift(letterToShift, config)
-  return isUpperCased ? shiftedLetter.toUpperCase() : shiftedLetter
+function convertCurrentShift(currentShift) {
+  if (currentShift >= 0 && currentShift <= 25) return currentShift
+
+  const multiple = Math.trunc(Math.abs(currentShift / 25))
+  if (currentShift < 0) {
+    const convertedShift = currentShift + multiple * 25 + 26
+    return convertedShift
+  }
+  if (currentShift > 0) {
+    const convertedShift = currentShift - multiple * 25 - 1
+    return convertedShift
+  }
 }
 
-function iterate(string, shift) {
+function shiftedPosition(ciphersArr, initialPosition) {
+  return ciphersArr.reduce((prevShift, currentCipher) => {
+    const [cipher, direction] = currentCipher.split('')
+    if (cipher === 'A') {
+      const currentShiftA = 25 - prevShift
+      return convertCurrentShift(currentShiftA)
+    }
 
-  return string
+    const shiftDirection = direction === '1'
+    if (cipher === 'C') {
+      const currentShiftC = shiftDirection ? prevShift + 1 : prevShift - 1
+      return convertCurrentShift(currentShiftC)
+    }
+
+    if (cipher === 'R') {
+      const currentShiftR = shiftDirection ? prevShift + 8 : prevShift - 8
+      return convertCurrentShift(currentShiftR)
+    }
+  }, initialPosition)
+}
+
+function doShift(char, ciphersArr) {
+  const isLetter = LETTER_REGEXP.test(char)
+  if (!isLetter) return char
+
+  const isLetterUpperCase = UPPERCASE_REGEXP.test(char)
+
+  const currentPosition = ALPHABET.indexOf(char.toLowerCase())
+  const newPosition = shiftedPosition(ciphersArr, currentPosition)
+  const shiftedChar = ALPHABET[newPosition]
+
+  if (isLetterUpperCase) return shiftedChar.toUpperCase()
+  return shiftedChar
+}
+
+function doCipher(str, config) {
+  const ciphersArr = ciphersFromConfig(config)
+  if (!ciphersArr) return 'The config is not valid. Please correct it. Example: "C1-C1-C0-R1-A"'
+
+  return str
     .split('')
-    .map(char => caesar(char, shift))
+    .map(char => doShift(char, ciphersArr))
     .join('')
 }
 
-const coded = iterate('ZZZzzz!', 1)
-const decoded = iterate(coded, 0)
-
-console.log('coded: ', coded)
-console.log('decoded: ', decoded)
+const result = doCipher('This is secret. Message about "_" symbol!', 'C1-R1-C0-C0-A-R0-R1-R1-A-C1')
+console.log(result)
